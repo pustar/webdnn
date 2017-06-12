@@ -3,7 +3,6 @@ Keras model converter
 """
 
 import argparse
-import ast
 import os
 import sys
 from os import path
@@ -12,7 +11,7 @@ import h5py
 
 from webdnn.backend.interface.generator import generate_descriptor
 from webdnn.graph.converters.keras import KerasGraphConverter
-from webdnn.graph.graph import Graph
+from webdnn.graph.shape import Shape
 
 
 def main():
@@ -22,7 +21,8 @@ def main():
     parser.add_argument("--backend", default="webgpu,webassembly,fallback",
                         help="comma-separated list of backends")
     parser.add_argument("--input_shape", required=True,
-                        help="shape of blobs for inputs (example: '(1,3,224,224)')")
+                        help="shape of blobs for inputs (example: '(1,3,224,224)'). " +
+                             "You can use placeholders (example: '(_,3,224,224)')")
     # parser.add_argument("--input_data_format", choices=["channels_first", "channels_last"])
     parser.add_argument("--out",
                         help="output directory (default: <model>/webdnn_graph_descriptor)")
@@ -30,7 +30,7 @@ def main():
     args = parser.parse_args()
 
     sys.stderr.write("Generating feedforward graph\n")
-    input_shape = ast.literal_eval(args.input_shape)
+    input_shape, placeholders = Shape.parse(args.input_shape)
     input_shapes = [input_shape]
     model = h5py.File(args.kerasmodel, "r")
     converter = KerasGraphConverter()

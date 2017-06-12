@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Union
 
 import numpy as np
@@ -54,9 +55,15 @@ class MetaInjector(Injector):
             offset_map[key] = len(buffer) // 4  # sizeof(int)
 
             if isinstance(value, int) or isinstance(value, np.int32) or isinstance(value, np.int64):
+                if isinstance(value, np.int64):
+                    warnings.warn("np.int64 value is given to MetaBufferInjector and converted into int32 value.")
+
                 buffer += np.array([value], dtype=np.int32).tobytes()
 
             elif isinstance(value, float) or isinstance(value, np.float32) or isinstance(value, np.float64):
+                if isinstance(value, np.float64):
+                    warnings.warn("np.float64 value is given to MetaBufferInjector and converted into float32 value.")
+
                 buffer += np.array([value], dtype=np.float32).tobytes()
 
             elif isinstance(value, bytes):

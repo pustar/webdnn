@@ -1,6 +1,8 @@
 from enum import auto, Enum
 from typing import Union, Optional, Sequence
 
+import numpy as np
+
 from webdnn.util.json import json
 
 
@@ -100,21 +102,25 @@ class PlaceHolder(json.SerializableMixin):
 
     @staticmethod
     def to_int(x: Union[int, "PlaceHolder"]):
-        if isinstance(x, int):
-            return x
-
-        if x.is_resolved:
+        if isinstance(x, PlaceHolder):
             return x.value if x.is_resolved else x
+
+        else:
+            return int(x)
 
     @staticmethod
     def force_int(x: Union[int, "PlaceHolder"]):
-        if isinstance(x, int):
-            return x
+        if isinstance(x, PlaceHolder):
+            if x.is_resolved:
+                return x.value
 
-        if x.is_resolved:
-            return x.value
+            raise ValueError(f"{x} is not resolved.")
+        else:
+            return int(x)
 
-        raise ValueError(f"{x} is not resolved.")
+    @staticmethod
+    def check_resolved(x: Union[int, "PlaceHolder"]):
+        return isinstance(x, int) or x.is_resolved
 
     def __new__(cls, dependency: Optional[Dependency] = None, value: Union[int, "PlaceHolder"] = None):
         if isinstance(value, int):
@@ -156,14 +162,14 @@ class PlaceHolder(json.SerializableMixin):
 
     @value.setter
     def value(self, new_v: int):
-        if not isinstance(new_v, int):
+        if not (isinstance(new_v, int) or isinstance(new_v, np.int32) or isinstance(new_v, np.int64)):
             raise TypeError(f"Placeholder#value must be a int, not '{type(new_v)}'")
 
         if self.is_resolved:
             raise ValueError(f"{self} is already resolved")
 
         else:
-            self._value = new_v
+            self._value = int(new_v)
 
     @property
     def is_resolved(self) -> bool:

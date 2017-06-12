@@ -192,7 +192,7 @@ def generate_allocation_info(variables: List[Variable], lifetime: Dict[Variable,
     result = {}  # type: Dict[Variable, int]
 
     while len(queue) > 0:
-        min_offset = 999999999999
+        min_offset = +float("inf")
         min_offset_v = None
 
         # find space
