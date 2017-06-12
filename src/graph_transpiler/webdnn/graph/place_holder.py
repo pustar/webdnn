@@ -120,14 +120,15 @@ class PlaceHolder(json.SerializableMixin):
 
     @staticmethod
     def check_resolved(x: Union[int, "PlaceHolder"]):
-        return isinstance(x, int) or x.is_resolved
+        if isinstance(x, PlaceHolder):
+            return x.is_resolved
+
+        else:
+            return True
 
     def __new__(cls, dependency: Optional[Dependency] = None, value: Union[int, "PlaceHolder"] = None):
-        if isinstance(value, int):
-            return value
-
         if isinstance(value, PlaceHolder):
-            return value.value if value.is_resolved else value
+            return value
 
         return super().__new__(cls)
 
@@ -188,8 +189,8 @@ class PlaceHolder(json.SerializableMixin):
     def __add__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return self.value + other
+        if self.is_resolved and other.is_resolved:
+            return self.value + other.value
 
         if self.dependency:
             if self.dependency.operator == PlaceHolderOperator.Add:
@@ -219,8 +220,8 @@ class PlaceHolder(json.SerializableMixin):
     def __sub__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return self.value - other
+        if self.is_resolved and other.is_resolved:
+            return self.value - other.value
 
         if self.dependency:
             if self.dependency.operator == PlaceHolderOperator.Add:
@@ -246,8 +247,8 @@ class PlaceHolder(json.SerializableMixin):
     def __rsub__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return other - self.value
+        if self.is_resolved and other.is_resolved:
+            return other.value - self.value
 
         if self.dependency:
             if self.dependency.operator == PlaceHolderOperator.Add:
@@ -273,8 +274,8 @@ class PlaceHolder(json.SerializableMixin):
     def __mul__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return self.value * other
+        if self.is_resolved and other.is_resolved:
+            return self.value * other.value
 
         if self.dependency:
             if self.dependency.operator == PlaceHolderOperator.Add:
@@ -313,32 +314,32 @@ class PlaceHolder(json.SerializableMixin):
     def __floordiv__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return self.value // other
+        if self.is_resolved and other.is_resolved:
+            return self.value // other.value
 
         return PlaceHolder(Dependency(PlaceHolderOperator.FloorDiv, (self, other)))
 
     def __rfloordiv__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return other // self.value
+        if self.is_resolved and other.is_resolved:
+            return other.value // self.value
 
         return PlaceHolder(Dependency(PlaceHolderOperator.FloorDiv, (other, self)))
 
     def __mod__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return self.value % other
+        if self.is_resolved and other.is_resolved:
+            return self.value % other.value
 
         return PlaceHolder(Dependency(PlaceHolderOperator.Mod, (self, other)))
 
     def __rmod__(self, other: Union[int, "PlaceHolder"]) -> Union[int, "PlaceHolder"]:
         other = PlaceHolder(value=other)
 
-        if self.is_resolved and (isinstance(other, int) or other.is_resolved):
-            return other % self.value
+        if self.is_resolved and other.is_resolved:
+            return other.value % self.value
 
         return PlaceHolder(Dependency(PlaceHolderOperator.Mod, (other, self)))
 
